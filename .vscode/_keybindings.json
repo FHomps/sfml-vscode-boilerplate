@@ -35,23 +35,33 @@
 		"command": "workbench.action.debug.selectandstart"
 	},
 	{
-		"key": "f9",
+		"key": "f5",
 		"command": "workbench.action.tasks.runTask",
 		"args": "Build & Run: Release"
 	},
 	{
-		"key": "shift+f9",
+		"key": "shift+f5",
 		"command": "workbench.action.tasks.runTask",
 		"args": "Run: Release"
 	},
 	{
-		"key": "f10",
+		"key": "f6",
 		"command": "workbench.action.tasks.runTask",
 		"args": "Build & Run: Debug"
 	},
 	{
-		"key": "shift+f10",
+		"key": "shift+f6",
 		"command": "workbench.action.tasks.runTask",
 		"args": "Run: Debug"
 	},
+	{
+		"key": "f7",
+		"command": "workbench.action.tasks.runTask",
+		"args": "Build & Run: Tests"
+	},
+	{
+		"key": "shift+f7",
+		"command": "workbench.action.tasks.runTask",
+		"args": "Run: Test"
+	}
 ]

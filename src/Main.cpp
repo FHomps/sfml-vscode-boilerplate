@@ -2,34 +2,20 @@
 
 int main()
 {
-#if defined(_DEBUG)
-	std::cout << "Hello World!" << std::endl;
-#endif
+	sf::RenderWindow window(sf::VideoMode(640, 480), "Main window");
+	window.setFramerateLimit(60);
 
-	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-#ifdef SFML_SYSTEM_WINDOWS
-	__windowsHelper.setIcon(window.getSystemHandle());
-#endif
-
-	sf::CircleShape shape(window.getSize().x/2);
-	shape.setFillColor(sf::Color::White);
-
-	sf::Texture shapeTexture;
-	shapeTexture.loadFromFile("content/sfml.png");
-	shape.setTexture(&shapeTexture);
-
-	sf::Event event;
+	sf::Event haps;
 
 	while (window.isOpen())
 	{
-		while (window.pollEvent(event))
+		while (window.pollEvent(haps))
 		{
-			if (event.type == sf::Event::Closed)
+			if (haps.type == sf::Event::Closed)
 				window.close();
 		}
 
-		window.clear();
-		window.draw(shape);
+		window.clear(sf::Color(20, 20, 30));
 		window.display();
 	}
 
