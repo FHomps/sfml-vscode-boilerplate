@@ -53,7 +53,7 @@ Fork from https://github.com/andrew-r-king/sfml-vscode-boilerplate adapted to my
 
 ### Windows
 
-1. Download & Extract SFML to **C:/SFML-2.5.1/** where the bin/lib/include folders are contained within
+1. Download & Extract SFML to **C:/lib/SFML/** where the bin/lib/include folders are contained within
 2. Download & Extract MinGW to **C:/mingw32/** where the bin/lib/include folders are contained within
 
 ### MacOS
@@ -239,7 +239,7 @@ BUILD_MACROS= \
 Dependency .dll/.so files to include in the bin/(build) folders
 ```makefile
 BUILD_DEPENDENCIES= \
-	C:/SFML-2.5.1/bin/openal32.dll
+	C:/lib/SFML/bin/openal32.dll
 ```
 
 ## MacOS-specific:
@@ -271,12 +271,12 @@ PRODUCTION_DEPENDENCIES= \
   C:/mingw32/bin/libgcc_s_dw2-1.dll \
   C:/mingw32/bin/libstdc++-6.dll \
   C:/mingw32/bin/libwinpthread-1.dll \
-  C:/SFML-2.5.1/bin/openal32.dll \
-  C:/SFML-2.5.1/bin/sfml-audio-2.dll \
-  C:/SFML-2.5.1/bin/sfml-graphics-2.dll \
-  C:/SFML-2.5.1/bin/sfml-network-2.dll \
-  C:/SFML-2.5.1/bin/sfml-system-2.dll \
-  C:/SFML-2.5.1/bin/sfml-window-2.dll \
+  C:/lib/SFML/bin/openal32.dll \
+  C:/lib/SFML/bin/sfml-audio-2.dll \
+  C:/lib/SFML/bin/sfml-graphics-2.dll \
+  C:/lib/SFML/bin/sfml-network-2.dll \
+  C:/lib/SFML/bin/sfml-system-2.dll \
+  C:/lib/SFML/bin/sfml-window-2.dll \
   content
 ```
 
@@ -562,15 +562,15 @@ pacman -S mingw-w64-i686-toolchain mingw-w64-x86_64-toolchain mingw-w64-i686-ope
 ```
 3. That will install both x86 & x64 versions (so you can try both). It may take a while, but once finished, exit msys2.
 4. Build SFML. To start with, install CMake & doxygen (64 bit version). Then download [this script](https://gist.github.com/andrew-r-king/5f8ea0eda064cbfb33f4f5d373011e0b) and edit the GCC_DIR line to either "/c/msys64/mingw64/bin" or "/c/msys64/mingw32/bin" depending on which architecture you want to target. Run the script, and if all goes well, you should have a compiled version of SFML in C:/SFML/2.5.1.
-5. rename that folder so its architecture specific. For my own build, I did "C:/SFML-2.5.1-gcc-8.3.0/mingw64"
+5. rename that folder so its architecture specific. For my own build, I did "C:/lib/SFML-gcc-8.3.0/mingw64"
 6. Open sfml-vscode-boilerplate in VS Code, go into settings.json and comment out ".vscode/launch.json in "files.exclude", because we need to edit it. Also comment out "build.sh"
-7. Also in settings.json, go down to "terminal.integrated.env.windows" and change it to "C:/msys64/mingw64/bin;C:/SFML-2.5.1-gcc-8.3.0/mingw64/bin" (the new paths)
-8. In ".vscode/c_cpp_properties.json", go to the Win32 configuration and change the "compilerPath" to "C:/msys64/mingw64/bin/gcc.exe" and the SFML "includePath" to "C:/SFML-2.5.1-gcc-8.3.0/mingw64/include"
+7. Also in settings.json, go down to "terminal.integrated.env.windows" and change it to "C:/msys64/mingw64/bin;C:/lib/SFML-gcc-8.3.0/mingw64/bin" (the new paths)
+8. In ".vscode/c_cpp_properties.json", go to the Win32 configuration and change the "compilerPath" to "C:/msys64/mingw64/bin/gcc.exe" and the SFML "includePath" to "C:/lib/SFML-gcc-8.3.0/mingw64/include"
 9. In ".vscode/launch.json", go to the "windows" configuration and change "miDebuggerPath" to "C:/msys64/mingw64/bin/gdb.exe"
 10. Finally, in env/windows.all.mk, change _MINGW & _SFML (arbitrary variables) to:
 ```makefile
 _MINGW := C:/msys64/mingw64/bin
-_SFML := C:/SFML-2.5.1-gcc-8.3.0/mingw64
+_SFML := C:/lib/SFML-gcc-8.3.0/mingw64
 ```
 
 11. Finally, in build.sh, line 44, (windows path if running the script outside vscode), change to 'export PATH="/c/SFML-2.5.1/bin:/c/mingw32/bin:$PATH"', or alternatively if you're building without vscode (described above), you can add this snippet of in build.sh above "bash ../build.sh $1 $2 $3 $4":

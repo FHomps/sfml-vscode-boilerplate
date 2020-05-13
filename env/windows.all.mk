@@ -1,7 +1,7 @@
 CC := g++.exe
 
 _MINGW := C:/mingw32/bin
-_SFML := C:/SFML-2.5.1
+_SFML := C:/lib/SFML
 _SFML_BIN := $(_SFML)/bin
 
 LIB_DIRS := \
