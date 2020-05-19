@@ -226,6 +226,25 @@ POST_COMPILE = mv -f $(DEP_DIR)/$*.Td $(DEP_DIR)/$*.d && touch $@
 POST_COMPILE_T = mv -f $(DEP_DIR)/.$(TEST_DIR)/$*.Td $(DEP_DIR)/.$(TEST_DIR)/$*.d && touch $@
 
 #==============================================================================
+# Unicode
+UNI_COPY := echo -n "➦"
+UNI_LINK := echo -n "⇛"
+ifeq ($(PLATFORM),osx)
+	UNI_COPY := printf "➦"
+	UNI_LINK := printf "⇛"
+endif
+ifeq ($(PLATFORM),windows)
+	UNI_COPY := printf '\xE2\x9E\xA6'
+	UNI_LINK := printf '\xE2\x87\x9B'
+endif
+
+# Misc
+ORIGIN_FLAG := '-Wl,-R$$ORIGIN'
+ifeq ($(PLATFORM),osx)
+	ORIGIN_FLAG :=
+endif
+
+#==============================================================================
 # Build Scripts
 all:
 	@$(MAKE) makepch
@@ -290,17 +309,35 @@ $(ASM_DIR)/%.o.asm: $(OBJ_DIR)/%.o
 
 $(TARGET): $(_PCH_GCH) $(OBJS) $(ASMS) $(TEST_DIR)
 	$(color_reset)
-	$(if $(_CLEAN),@echo; printf '\xE2\x87\x9B'; echo '  Linking: $(TARGET)')
+	$(if $(_CLEAN),@echo; $(UNI_LINK); echo '  Linking: $(TARGET)')
 ifeq ($(suffix $(TARGET)),.dll)
 ifeq ($(BUILD_STATIC),true)
-	-$(_Q)rm -rf $(BLD_DIR)/lib$(_NAMENOEXT).a
-	$(_Q)ar.exe -r -s $(BLD_DIR)/lib$(_NAMENOEXT).a $(OBJS)
+	-$(_Q)rm -rf $(BLD_DIR)/$(_NAMENOEXT).a
+	$(_Q)ar.exe -r -s $(BLD_DIR)/$(_NAMENOEXT).a $(OBJS)
 else
-	-$(_Q)rm -rf $(BLD_DIR)/lib$(_NAMENOEXT).def $(BLD_DIR)/lib$(_NAMENOEXT).a
-	$(_Q)$(CC) -shared -Wl,--output-def="$(BLD_DIR)/lib$(_NAMENOEXT).def" -Wl,--out-implib="$(BLD_DIR)/lib$(_NAMENOEXT).a" -Wl,--dll $(_LIB_DIRS) $(OBJS) -o $@ $(_SYMBOLS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
+	-$(_Q)rm -rf $(BLD_DIR)/$(_NAMENOEXT).def $(BLD_DIR)/$(_NAMENOEXT).a
+	$(_Q)$(CC) -shared -Wl,--output-def="$(BLD_DIR)/$(_NAMENOEXT).def" -Wl,--out-implib="$(BLD_DIR)/$(_NAMENOEXT).a" -Wl,--dll $(_LIB_DIRS) $(OBJS) -o $@ $(_SYMBOLS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
 endif
 else
-	$(_Q)$(CC) $(_LIB_DIRS) $(_SYMBOLS) -o $@ $(OBJS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
+ifeq ($(suffix $(TARGET)),.dylib)
+ifeq ($(BUILD_STATIC),true)
+	-$(_Q)rm -rf $(BLD_DIR)/$(_NAMENOEXT).a
+	$(_Q)ar -r -s $(BLD_DIR)/$(_NAMENOEXT).a $(OBJS)
+else
+	$(_Q)$(CC) -dynamiclib -undefined suppress -flat_namespace $(_LIB_DIRS) $(OBJS) -o $@ $(_SYMBOLS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
+endif
+else
+ifeq ($(suffix $(TARGET)),.so)
+ifeq ($(BUILD_STATIC),true)
+	-$(_Q)rm -rf $(BLD_DIR)/$(_NAMENOEXT).a
+	$(_Q)ar -r -s $(BLD_DIR)/$(_NAMENOEXT).a $(OBJS)
+else
+	$(_Q)$(CC) -shared $(_LIB_DIRS) $(OBJS) -o $@ $(_SYMBOLS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
+endif
+else
+	$(_Q)$(CC) $(_LIB_DIRS) $(_SYMBOLS) -o $@ $(ORIGIN_FLAG) $(OBJS) $(_LINK_LIBRARIES) $(BUILD_FLAGS)
+endif
+endif
 endif
 	@echo
 ifneq ($(BUILD_DEPENDENCIES),)
@@ -336,7 +373,7 @@ mkdirprod:
 .PHONY: mkdirprod
 
 define do_copy_to_clean
-	@printf "\xE2\x9E\xA6"
+	@$(UNI_COPY)
 	@echo  "  Copying \"$(1)\" to \"$(CURDIR)/$(2)\""
 	$(shell cp -r $(1) $(2))
 endef
@@ -400,7 +437,9 @@ ifeq ($(PLATFORM),osx)
 	$(foreach dylib,$(PRODUCTION_MACOS_DYLIBS),$(call copy_to,$(dylib),$(PRODUCTION_FOLDER)/MacOS))
 	$(_Q)install_name_tool -add_rpath @executable_path/../Frameworks $(PRODUCTION_FOLDER)/MacOS/$(NAME)
 	$(_Q)install_name_tool -add_rpath @loader_path/.. $(PRODUCTION_FOLDER)/MacOS/$(NAME)
+	$(foreach dylib,$(PRODUCTION_MACOS_DYLIBS),$(shell install_name_tool -change @rpath/$(notdir $(dylib)) @rpath/MacOS/$(notdir $(dylib)) $(PRODUCTION_FOLDER)/MacOS/$(NAME)))
 	$(foreach dylib,$(PRODUCTION_MACOS_DYLIBS),$(shell install_name_tool -change $(notdir $(dylib)) @rpath/MacOS/$(notdir $(dylib)) $(PRODUCTION_FOLDER)/MacOS/$(NAME)))
+	$(foreach dylib,$(PRODUCTION_MACOS_DYLIBS),$(shell install_name_tool -change $(dylib) @rpath/MacOS/$(notdir $(dylib)) $(PRODUCTION_FOLDER)/MacOS/$(NAME)))
 	$(foreach framework,$(PRODUCTION_MACOS_FRAMEWORKS),$(call copy_to,$(framework),$(PRODUCTION_FOLDER)/Frameworks))
 ifeq ($(PRODUCTION_MACOS_MAKE_DMG),true)
 	$(shell hdiutil detach /Volumes/$(PRODUCTION_MACOS_BUNDLE_NAME)/ &> /dev/null)

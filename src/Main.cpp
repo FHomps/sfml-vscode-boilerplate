@@ -1,4 +1,4 @@
-#include "Main.hpp"
+#include "Platform/Platform.hpp"
 
 int main()
 {

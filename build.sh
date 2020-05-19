@@ -71,7 +71,7 @@ profiler_osx() {
 	exit 1
 }
 
-buildrun() {
+cmd_buildrun() {
 	display_styled_symbol 3 "⬤" "Build & Run: $BUILD (target: $NAME)"
 	echo
 	BLD=$BUILD
@@ -90,7 +90,7 @@ buildrun() {
 	fi
 }
 
-build() {
+cmd_build() {
 	display_styled_symbol 3 "⬤" "Build: $BUILD (target: $NAME)"
 	echo
 	BLD=$BUILD
@@ -104,7 +104,7 @@ build() {
 	fi
 }
 
-rebuild() {
+cmd_rebuild() {
 	display_styled_symbol 3 "⬤" "Rebuild: $BUILD (target: $NAME)"
 	echo
 	BLD=$BUILD
@@ -118,7 +118,7 @@ rebuild() {
 	fi
 }
 
-run() {
+cmd_run() {
 	display_styled_symbol 3 "⬤" "Run: $BUILD (target: $NAME)"
 	echo
 	launch
@@ -129,7 +129,7 @@ run() {
 	fi
 }
 
-buildprod() {
+cmd_buildprod() {
 	display_styled_symbol 3 "⬤" "Production Build: $BUILD (target: $NAME)"
 	echo
 	if [[ $BUILD == 'Release' ]]; then
@@ -147,7 +147,7 @@ buildprod() {
 	fi
 }
 
-profile() {
+cmd_profile() {
 	display_styled_symbol 3 "⬤" "Profile: $BUILD (target: $NAME)"
 	echo
 	if [[ $PLATFORM == 'osx' ]]; then
@@ -238,22 +238,37 @@ for target in $BUILD_TARGETS; do
 			fi
 		else
 			if [[ $BUILD == 'Debug' ]]; then
-				export NAME=$target-d.dll
+				export NAME=lib$target-d.dll
 			else
-				export NAME=$target.dll
+				export NAME=lib$target.dll
 			fi
 		fi
 	else
-		if [[ $target == 'main' ]]; then
-			export NAME=$cwd
-			if [[ $BUILD == 'Tests' ]]; then
-				NAME=tests_$NAME
+		if [[ $PLATFORM == 'osx' ]]; then
+			if [[ $target == 'main' ]]; then
+				export NAME=$cwd
+				if [[ $BUILD == 'Tests' ]]; then
+					NAME=tests_$NAME
+				fi
+			else
+				if [[ $BUILD == 'Debug' ]]; then
+					export NAME=lib$target-d.dylib
+				else
+					export NAME=lib$target.dylib
+				fi
 			fi
 		else
-			if [[ $BUILD == 'Debug' ]]; then
-				export NAME=$target-d.so
+			if [[ $target == 'main' ]]; then
+				export NAME=$cwd
+				if [[ $BUILD == 'Tests' ]]; then
+					NAME=tests_$NAME
+				fi
 			else
-				export NAME=$target.so
+				if [[ $BUILD == 'Debug' ]]; then
+					export NAME=lib$target-d.so
+				else
+					export NAME=lib$target.so
+				fi
 			fi
 		fi
 	fi
@@ -262,9 +277,9 @@ for target in $BUILD_TARGETS; do
 		export SRC_TARGET=$target
 	fi
 
-	CHILD_CMD="$CMD $target"
+	CHILD_CMD="cmd_$CMD $target"
 	if [[ $CMD == 'buildrun' && $target != 'main' ]]; then
-		CHILD_CMD=build
+		CHILD_CMD="cmd_build"
 	fi
 
 
